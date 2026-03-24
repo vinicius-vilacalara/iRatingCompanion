@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>iRacing Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <!-- Background grid -->
+  <div class="bg-grid"></div>
+  <div class="scanlines"></div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">⬡</span>
+        <div class="logo-text">
+          <span class="logo-title">iRACING</span>
+          <span class="logo-sub">TRACKER</span>
+        </div>
+      </div>
+      <nav class="nav">
+        <button class="nav-btn active" data-page="dashboard">
+          <span class="nav-icon">◈</span> Dashboard
+        </button>
+        <button class="nav-btn" data-page="log">
+          <span class="nav-icon">✦</span> Log Session
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- ═══════════════════ DASHBOARD PAGE ═══════════════════ -->
+    <section id="page-dashboard" class="page active">
+
+      <!-- Stats row -->
+      <div class="stats-row">
+        <div class="stat-card irating-card">
+          <div class="stat-label">iRATING</div>
+          <div class="stat-value" id="stat-irating">—</div>
+          <div class="stat-delta" id="stat-irating-delta"></div>
+          <button class="edit-btn" data-field="irating" title="Edit">✎</button>
+        </div>
+        <div class="stat-card safety-card">
+          <div class="stat-label">SAFETY RATING</div>
+          <div class="stat-value" id="stat-safety">—</div>
+          <div class="stat-delta" id="stat-safety-delta"></div>
+          <button class="edit-btn" data-field="safety" title="Edit">✎</button>
+        </div>
+        <div class="stat-card sessions-card">
+          <div class="stat-label">SESSIONS</div>
+          <div class="stat-value" id="stat-sessions">0</div>
+          <div class="stat-delta" id="stat-winrate"></div>
+        </div>
+      </div>
+
+      <!-- Chart -->
+      <div class="chart-section">
+        <div class="chart-header">
+          <h2 class="section-title">PERFORMANCE HISTORY</h2>
+          <div class="chart-tabs">
+            <button class="chart-tab active" data-chart="irating">iRating</button>
+            <button class="chart-tab" data-chart="safety">Safety</button>
+            <button class="chart-tab" data-chart="both">Both</button>
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="progressChart"></canvas>
+          <div class="chart-empty" id="chart-empty">
+            <span>No sessions logged yet</span><br>
+            <small>Log your first session to see progress</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Session history table -->
+      <div class="history-section">
+        <h2 class="section-title">SESSION HISTORY</h2>
+        <div class="table-wrap">
+          <table class="session-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Track</th>
+                <th>Car</th>
+                <th>Start</th>
+                <th>Finish</th>
+                <th>iRating Δ</th>
+                <th>Safety Δ</th>
+                <th>iRating</th>
+                <th>Safety</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="session-tbody">
+              <tr class="empty-row"><td colspan="10">No sessions yet</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════ LOG SESSION PAGE ═══════════════════ -->
+    <section id="page-log" class="page">
+      <div class="log-container">
+        <div class="log-header">
+          <h2 class="section-title">LOG SESSION</h2>
+          <div class="log-subtitle">Record your race results</div>
+        </div>
+
+        <div class="form-grid">
+          <!-- Left column -->
+          <div class="form-col">
+            <div class="form-group">
+              <label class="form-label" for="irating-gain">
+                <span class="label-icon">⬆</span> iRating Gain
+                <span class="label-hint">(negative for loss)</span>
+              </label>
+              <input class="form-input" type="number" id="irating-gain" placeholder="e.g. +42 or -18" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="safety-gain">
+                <span class="label-icon">⬆</span> Safety Rating Gain
+                <span class="label-hint">(negative for loss)</span>
+              </label>
+              <input class="form-input" type="number" id="safety-gain" step="0.01" placeholder="e.g. +0.12 or -0.05" />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group half">
+                <label class="form-label" for="start-pos">
+                  <span class="label-icon">◐</span> Start Position
+                </label>
+                <input class="form-input" type="number" id="start-pos" placeholder="P1, P2..." min="1" />
+              </div>
+              <div class="form-group half">
+                <label class="form-label" for="final-pos">
+                  <span class="label-icon">◑</span> Final Position
+                </label>
+                <input class="form-input" type="number" id="final-pos" placeholder="P1, P2..." min="1" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Right column -->
+          <div class="form-col">
+            <div class="form-group">
+              <label class="form-label" for="car-input">
+                <span class="label-icon">◈</span> Car
+              </label>
+              <input class="form-input" type="text" id="car-input" placeholder="e.g. Mazda MX-5, Porsche 992" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="track-input">
+                <span class="label-icon">◎</span> Track
+              </label>
+              <input class="form-input" type="text" id="track-input" placeholder="e.g. Spa-Francorchamps, Brands Hatch" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="obs-input">
+                <span class="label-icon">✦</span> Observations
+              </label>
+              <textarea class="form-input form-textarea" id="obs-input" placeholder="Notes about the race, incidents, strategy..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preview -->
+        <div class="preview-row" id="log-preview" style="display:none">
+          <div class="preview-item">
+            <span class="preview-label">NEW iRATING</span>
+            <span class="preview-value" id="preview-irating">—</span>
+          </div>
+          <div class="preview-sep">→</div>
+          <div class="preview-item">
+            <span class="preview-label">NEW SAFETY</span>
+            <span class="preview-value" id="preview-safety">—</span>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn-secondary" id="clear-btn">Clear</button>
+          <button class="btn-primary" id="submit-btn">
+            <span class="btn-icon">✦</span> LOG SESSION
+          </button>
+        </div>
+
+        <div class="toast" id="toast"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Edit modal -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <div class="modal-title" id="modal-title">Edit Value</div>
+      <input class="form-input" type="number" id="modal-input" step="any" />
+      <div class="modal-actions">
+        <button class="btn-secondary" id="modal-cancel">Cancel</button>
+        <button class="btn-primary" id="modal-save">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>
