@@ -98,6 +98,14 @@ function renderTable() {
     const saClass = s.safety_gain >= 0 ? 'cell-gain-pos' : 'cell-gain-neg';
     const irSign = s.irating_gain >= 0 ? '+' : '';
     const saSign = s.safety_gain >= 0 ? '+' : '';
+    const score = s.session_score ?? '-';
+    const quality = s.session_quality ?? '-';
+
+    const qualityClass =
+      quality === 'Good' ? 'quality-good' :
+      quality === 'Bad' ? 'quality-bad' :
+      'quality-avg';
+
 
     return `
       <tr>
@@ -108,9 +116,18 @@ function renderTable() {
         <td class="cell-pos">${s.final_position ? 'P' + s.final_position : '—'}</td>
         <td class="${irClass}">${irSign}${s.irating_gain}</td>
         <td class="${saClass}">${saSign}${parseFloat(s.safety_gain).toFixed(2)}</td>
+
+        <!-- ✅ NOVAS COLUNAS -->
+        <td class="cell-score">${score}</td>
+        <td class="${qualityClass}">${quality}</td>
+
+        <!-- 🔒 SEU CÓDIGO ORIGINAL PRESERVADO -->
         <td class="cell-rating">${s.irating_after?.toLocaleString() || '—'}</td>
         <td class="cell-safety">${parseFloat(s.safety_after || 0).toFixed(2)}</td>
-        <td><button class="del-btn" onclick="deleteSession(${s.id})" title="Delete">✕</button></td>
+
+        <td>
+          <button class="del-btn" onclick="deleteSession(${s.id})" title="Delete">✕</button>
+        </td>
       </tr>
     `;
   }).join('');

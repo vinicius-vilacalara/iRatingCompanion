@@ -1,6 +1,13 @@
+require('dotenv').config();
+
+if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
+  throw new Error('Env vars not loaded. Check .env file.');
+}
+
 const express = require('express');
 const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
+const { calculateSessionScore } = require('./utils/score');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -58,7 +65,18 @@ app.get('/api/sessions', async (req, res) => {
 
   if (error) return res.status(500).json(error);
 
-  res.json(data);
+  // ✅ ENRIQUECER COM SCORE
+  const enriched = data.map(session => {
+    const { finalScore, quality } = calculateSessionScore(session);
+
+    return {
+      ...session,
+      session_score: finalScore,
+      session_quality: quality
+    };
+  });
+
+  res.json(enriched);
 });
 
 app.post('/api/sessions', async (req, res) => {
@@ -90,19 +108,21 @@ app.post('/api/sessions', async (req, res) => {
     parseFloat((currentSafety + parseFloat(safety_gain || 0)).toFixed(2))
   );
 
+  const newSession = {
+    irating_gain: parseInt(irating_gain),
+    safety_gain: parseFloat(safety_gain),
+    start_position: start_position || null,
+    final_position: final_position || null,
+    car: car || null,
+    track: track || null,
+    obs: obs || null,
+    irating_after: newIrating,
+    safety_after: newSafety
+  };
+
   const { data, error } = await supabase
     .from('sessions')
-    .insert([{
-      irating_gain: parseInt(irating_gain),
-      safety_gain: parseFloat(safety_gain),
-      start_position: start_position || null,
-      final_position: final_position || null,
-      car: car || null,
-      track: track || null,
-      obs: obs || null,
-      irating_after: newIrating,
-      safety_after: newSafety
-    }])
+    .insert([newSession])
     .select();
 
   if (error) return res.status(500).json(error);
@@ -118,10 +138,15 @@ app.post('/api/sessions', async (req, res) => {
     value: String(newSafety)
   });
 
+  // ✅ CALCULAR SCORE DO NOVO REGISTRO
+  const { finalScore, quality } = calculateSessionScore(data[0]);
+
   res.json({
     id: data[0].id,
     irating_after: newIrating,
-    safety_after: newSafety
+    safety_after: newSafety,
+    session_score: finalScore,
+    session_quality: quality
   });
 });
 

@@ -382,3 +382,39 @@ input[type=number]::-webkit-inner-spin-button { opacity: 0.3; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* QUALITY BADGE BASE */
+.quality-good,
+.quality-avg,
+.quality-bad {
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  display: inline-block;
+}
+
+/* 🟢 GOOD */
+.quality-good {
+  color: #00ff9c;
+  background: rgba(0, 255, 156, 0.1);
+  border: 1px solid rgba(0, 255, 156, 0.3);
+}
+
+/* 🟡 AVERAGE */
+.quality-avg {
+  color: #fbff00;
+  background: rgba(255, 200, 0, 0.1);
+  border: 1px solid rgba(255, 200, 0, 0.3);
+}
+
+/* 🔴 BAD */
+.quality-bad {
+  color: #ff4d4d;
+  background: rgba(255, 77, 77, 0.1);
+  border: 1px solid rgba(255, 77, 77, 0.3);
+}
+
+.quality-good {
+  box-shadow: 0 0 6px rgba(0,255,156,0.4);
+}
