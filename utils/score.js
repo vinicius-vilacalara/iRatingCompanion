@@ -41,16 +41,36 @@ function calculateSessionScore(session) {
   const srScore = getSRScore(parseFloat(safety_gain));
 
   const finalScore = Math.max(0, Math.min(100, Math.round(
-    positionScore * 0.4 + //68 = 30
-    irScore * 0.3 +  //59 = 17
-    srScore * 0.3   //50 = 15
+    positionScore * 0.4 + 
+    irScore * 0.3 +  
+    srScore * 0.3   
   )));
 
   let quality = 'Average';
   if (finalScore >= 65) quality = 'Good';
   if (finalScore < 40) quality = 'Bad';
 
-  return { finalScore, quality };
+  const tags = [];
+  if (delta > 5) tags.push('Big Position Gain');
+  if (delta < -3) tags.push('Big lost positions');
+
+  if(safety_gain > 0.1) tags.push('Clean Race');
+  if(safety_gain < 0) tags.push('Incidents');
+
+  if(irating_gain > 50) tags.push('Strong IR gain');
+  if(irating_gain < 0) tags.push('IR Loss');
+
+  if (start_position > 6 && final_position <= 5) tags.push('Recovered Well');
+
+  if (final_position === 1) tags.push('Win 🏆');
+
+  if (final_position <= 3) tags.push('Podium');
+
+  console.log("TAGS:", tags)
+
+  return { finalScore, quality, tags };
+
+ 
 }
 
 module.exports = { calculateSessionScore };

@@ -108,6 +108,15 @@ app.post('/api/sessions', async (req, res) => {
     parseFloat((currentSafety + parseFloat(safety_gain || 0)).toFixed(2))
   );
 
+  // ─── CALCULAR SCORE ANTES DE SALVAR 🔥 ──────
+  const { finalScore, quality, tags } = calculateSessionScore({
+    irating_gain: parseInt(irating_gain),
+    safety_gain: parseFloat(safety_gain),
+    start_position,
+    final_position
+  });
+  
+
   const newSession = {
     irating_gain: parseInt(irating_gain),
     safety_gain: parseFloat(safety_gain),
@@ -117,13 +126,15 @@ app.post('/api/sessions', async (req, res) => {
     track: track || null,
     obs: obs || null,
     irating_after: newIrating,
-    safety_after: newSafety
+    safety_after: newSafety,
+    session_tags: tags
   };
 
   const { data, error } = await supabase
     .from('sessions')
     .insert([newSession])
-    .select();
+    .select()
+    .single();
 
   if (error) return res.status(500).json(error);
 
@@ -138,15 +149,15 @@ app.post('/api/sessions', async (req, res) => {
     value: String(newSafety)
   });
 
-  // ✅ CALCULAR SCORE DO NOVO REGISTRO
-  const { finalScore, quality } = calculateSessionScore(data[0]);
+  console.log(res);
+
 
   res.json({
-    id: data[0].id,
+    id: data.id,
     irating_after: newIrating,
     safety_after: newSafety,
     session_score: finalScore,
-    session_quality: quality
+    session_tags: tags
   });
 });
 

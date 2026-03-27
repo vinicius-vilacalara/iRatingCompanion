@@ -100,6 +100,8 @@ function renderTable() {
     const saSign = s.safety_gain >= 0 ? '+' : '';
     const score = s.session_score ?? '-';
     const quality = s.session_quality ?? '-';
+    const tags = s.session_tags || [];
+    const tagsHtml = tags.map(t => `<span class="tag">${t}</span>`).join('');
 
     const qualityClass =
       quality === 'Good' ? 'quality-good' :
@@ -124,6 +126,7 @@ function renderTable() {
         <!-- 🔒 SEU CÓDIGO ORIGINAL PRESERVADO -->
         <td class="cell-rating">${s.irating_after?.toLocaleString() || '—'}</td>
         <td class="cell-safety">${parseFloat(s.safety_after || 0).toFixed(2)}</td>
+        <td class="cell-tags">${tagsHtml}</td>
 
         <td>
           <button class="del-btn" onclick="deleteSession(${s.id})" title="Delete">✕</button>
@@ -302,7 +305,15 @@ async function submitSession() {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   });
+  if (!res.ok) {
+  const errorText = await res.text();
+  console.error("BACKEND ERROR:", errorText);
+  showToast('Erro ao salvar sessão', true);
+  return;
+  }
+
   const data = await res.json();
+
 
   showToast(`Session logged! iRating: ${data.irating_after.toLocaleString()} | Safety: ${parseFloat(data.safety_after).toFixed(2)}`);
   clearForm();
