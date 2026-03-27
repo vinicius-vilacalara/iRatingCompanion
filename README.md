@@ -6,8 +6,7 @@ A clean, motorsport-themed web app to track your iRating and Safety Rating progr
 - **Log Session** — Record iRating gain/loss, Safety Rating, start/finish positions, car, track, and notes
 - **Dashboard** — View current ratings, session history table, and progress charts (iRating, Safety, or both)
 - **Editable baseline** — Set your starting iRating/Safety Rating via the ✎ button
-- **SQLite database** — All data stored locally in `db/iracing.db`
-- **Phase 2 ready** — iRacing API sync coming next
+- **Phase 2 ** — iRacing API sync coming next
 
 ## Setup
 
