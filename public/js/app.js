@@ -8,6 +8,8 @@ let settings = { current_irating: '1500', current_safety: '3.00' };
 let chart = null;
 let currentChartMode = 'irating';
 let editingField = null;
+let currentPage = 1;
+const pageSize = 10;
 
 // ─── Init ─────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
@@ -44,6 +46,7 @@ async function loadSettings() {
 async function loadSessions() {
   const res = await fetch('/api/sessions');
   sessions = await res.json();
+  currentPage = 1;
 }
 
 // ─── Dashboard ────────────────────────────────
@@ -91,8 +94,11 @@ function renderTable() {
     tbody.innerHTML = '<tr class="empty-row"><td colspan="10">No sessions logged yet</td></tr>';
     return;
   }
+  
+  const start = (currentPage - 1) * pageSize;
+  const paginated = sessions.slice(start, start + pageSize);
 
-  tbody.innerHTML = sessions.map(s => {
+  tbody.innerHTML = paginated.map(s => {
     const date = new Date(s.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' });
     const irClass = s.irating_gain >= 0 ? 'cell-gain-pos' : 'cell-gain-neg';
     const saClass = s.safety_gain >= 0 ? 'cell-gain-pos' : 'cell-gain-neg';
@@ -134,7 +140,42 @@ function renderTable() {
       </tr>
     `;
   }).join('');
+  renderPagination();
 }
+
+function renderPagination() {
+  const totalPages = Math.ceil(sessions.length / pageSize);
+  const container = document.getElementById('pagination');
+
+  if (!container) return;
+
+  if (totalPages <= 1) {
+    container.innerHTML = '';
+    return;
+  }
+
+  container.innerHTML = `
+    <button ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">
+      ← Prev
+    </button>
+
+    <span>Page ${currentPage} / ${totalPages}</span>
+
+    <button ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">
+      Next →
+    </button>
+  `;
+}
+
+function changePage(page) {
+  const totalPages = Math.ceil(sessions.length / pageSize);
+  if (page < 1 || page > totalPages) return;
+
+  currentPage = page;
+  renderTable();
+}
+
+
 
 // ─── Chart ────────────────────────────────────
 function renderChart(mode) {
