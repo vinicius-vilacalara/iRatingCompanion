@@ -435,3 +435,67 @@ function showToast(msg, isError = false) {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3500);
 }
+
+function applyFilters() {
+  const car = document.getElementById('filter-car').value.toLowerCase();
+  const track = document.getElementById('filter-track').value.toLowerCase();
+  const quality = document.getElementById('filter-quality').value;
+
+  const filtered = sessions.filter(s => {
+    const matchCar = !car || (s.car || '').toLowerCase().includes(car);
+    const matchTrack = !track || (s.track || '').toLowerCase().includes(track);
+    const matchQuality = !quality || s.session_quality === quality;
+
+    return matchCar && matchTrack && matchQuality;
+  });
+
+  renderSearchTable(filtered);
+  renderSearchSummary(filtered);
+}
+
+function renderSearchTable(data) {
+  const tbody = document.getElementById('search-tbody');
+
+  if (data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7">No results</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = data.map(s => {
+    const date = new Date(s.date).toLocaleDateString('en-GB');
+    const irSign = s.irating_gain >= 0 ? '+' : '';
+    const saSign = s.safety_gain >= 0 ? '+' : '';
+
+    return `
+      <tr>
+        <td>${date}</td>
+        <td>${s.track || '—'}</td>
+        <td>${s.car || '—'}</td>
+        <td>P${s.final_position || '—'}</td>
+        <td>${irSign}${s.irating_gain}</td>
+        <td>${saSign}${parseFloat(s.safety_gain).toFixed(2)}</td>
+        <td>${s.session_quality}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderSearchSummary(data) {
+  const container = document.getElementById('search-summary');
+
+  if (data.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+
+  const totalIR = data.reduce((sum, s) => sum + s.irating_gain, 0);
+  const totalSR = data.reduce((sum, s) => sum + parseFloat(s.safety_gain), 0);
+
+  container.innerHTML = `
+    <div class="summary-box">
+      <div>Sessions: <strong>${data.length}</strong></div>
+      <div>iRating Total: <strong>${totalIR >= 0 ? '+' : ''}${totalIR}</strong></div>
+      <div>Safety Total: <strong>${totalSR >= 0 ? '+' : ''}${totalSR.toFixed(2)}</strong></div>
+    </div>
+  `;
+}

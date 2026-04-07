@@ -31,6 +31,9 @@
         <button class="nav-btn" data-page="log">
           <span class="nav-icon">✦</span> Log Session
         </button>
+        <button class="nav-btn" data-page="search">
+          <span class="nav-icon">⌕</span> Search
+        </button>
       </nav>
     </div>
   </header>
@@ -201,6 +204,48 @@
         <div class="toast" id="toast"></div>
       </div>
     </section>
+
+    <section id="page-search" class="page">
+  <div class="history-section">
+    <h2 class="section-title">SEARCH SESSIONS</h2>
+
+    <!-- Filters -->
+    <div class="search-filters">
+      <input id="filter-car" class="form-input" placeholder="Filter by car..." />
+      <input id="filter-track" class="form-input" placeholder="Filter by track..." />
+
+      <select id="filter-quality" class="form-input">
+        <option value="">All Qualities</option>
+        <option value="Good">Good</option>
+        <option value="Average">Average</option>
+        <option value="Bad">Bad</option>
+      </select>
+
+      <button class="btn-primary" onclick="applyFilters()">Search</button>
+    </div>
+
+    <!-- Summary -->
+    <div class="search-summary" id="search-summary"></div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <table class="session-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Track</th>
+            <th>Car</th>
+            <th>Finish</th>
+            <th>iRating Δ</th>
+            <th>Safety Δ</th>
+            <th>Quality</th>
+          </tr>
+        </thead>
+        <tbody id="search-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+  </section>
 
   </main>
 
