@@ -34,6 +34,10 @@
         <button class="nav-btn" data-page="search">
           <span class="nav-icon">⌕</span> Search
         </button>
+        <button class="nav-btn" data-page="tracks">
+          <span class="nav-icon">◉</span> Track Analysis
+
+        </button>
       </nav>
     </div>
   </header>
@@ -246,6 +250,59 @@
     </div>
   </div>
   </section>
+  <section id="page-tracks" class="page">
+
+  <div class="history-section">
+
+    <h2 class="section-title">TRACK ANALYSIS</h2>
+
+    <!-- Summary Cards -->
+    <div class="track-summary-row">
+
+      <div class="track-stat-card">
+        <div class="track-stat-label">TRACKS</div>
+        <div class="track-stat-value" id="track-total-count">0</div>
+      </div>
+
+      <div class="track-stat-card">
+        <div class="track-stat-label">BEST TRACK</div>
+        <div class="track-stat-value" id="track-best-name">—</div>
+      </div>
+
+      <div class="track-stat-card">
+        <div class="track-stat-label">WORST TRACK</div>
+        <div class="track-stat-value" id="track-worst-name">—</div>
+      </div>
+
+      <div class="track-stat-card">
+        <div class="track-stat-label">MOST RACED</div>
+        <div class="track-stat-value" id="track-most-raced">—</div>
+      </div>
+
+    </div>
+
+    <div class="table-wrap">
+      <table class="session-table">
+
+        <thead>
+          <tr>
+            <th>Track</th>
+            <th>Sessions</th>
+            <th>Avg Finish</th>
+            <th>Avg iR/Race</th>
+            <th>Total iR</th>
+            <th>Total SR</th>
+          </tr>
+        </thead>
+
+        <tbody id="track-analysis-tbody"></tbody>
+
+      </table>
+    </div>
+
+  </div>
+
+</section>
 
   </main>
 

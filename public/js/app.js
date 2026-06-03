@@ -36,6 +36,7 @@ function setupNav() {
 async function loadAll() {
   await Promise.all([loadSettings(), loadSessions()]);
   updateDashboard();
+  renderTrackAnalysis();
 }
 
 async function loadSettings() {
@@ -498,4 +499,143 @@ function renderSearchSummary(data) {
       <div>Safety Total: <strong>${totalSR >= 0 ? '+' : ''}${totalSR.toFixed(2)}</strong></div>
     </div>
   `;
+}
+
+function buildTrackStats() {
+
+  const map = {};
+
+  sessions.forEach(session => {
+
+    if (!session.track) return;
+
+    if (!map[session.track]) {
+      map[session.track] = {
+        track: session.track,
+        sessions: 0,
+        totalIR: 0,
+        totalSR: 0,
+        finishSum: 0,
+        finishCount: 0
+      };
+    }
+
+    map[session.track].sessions++;
+    map[session.track].totalIR += session.irating_gain;
+    map[session.track].totalSR += parseFloat(session.safety_gain);
+
+    if (session.final_position) {
+      map[session.track].finishSum += session.final_position;
+      map[session.track].finishCount++;
+    }
+  });
+
+  return Object.values(map)
+    .map(track => ({
+      ...track,
+      avgFinish:
+        track.finishCount > 0
+          ? (track.finishSum / track.finishCount).toFixed(1)
+          : '-',
+      avgIR:
+        (track.totalIR / track.sessions).toFixed(1)
+    }))
+    .sort((a, b) => b.totalIR - a.totalIR);
+}
+
+function renderTrackAnalysis() {
+
+  const data = buildTrackStats();
+
+  const tbody = document.getElementById('track-analysis-tbody');
+
+  if (!tbody) return;
+
+  if (data.length === 0) {
+
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6">No track data available</td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  const MIN_SESSIONS = 3;
+
+const rankedTracks = data
+  .filter(t => t.sessions >= MIN_SESSIONS)
+  .sort((a, b) => b.avgIR - a.avgIR);
+
+const bestTrack =
+  rankedTracks.length > 0
+    ? rankedTracks[0]
+    : null;
+
+const worstTrack =
+  rankedTracks.length > 0
+    ? rankedTracks[rankedTracks.length - 1]
+    : null;
+
+  const mostRaced = [...data]
+    .sort((a, b) => b.sessions - a.sessions)[0];
+
+  document.getElementById('track-total-count').textContent =
+    data.length;
+
+document.getElementById('track-best-name').textContent =
+  bestTrack
+    ? `${bestTrack.track} (+${bestTrack.avgIR})`
+    : '—';
+
+document.getElementById('track-worst-name').textContent =
+  worstTrack
+    ? `${worstTrack.track} (${worstTrack.avgIR})`
+    : '—';
+
+  document.getElementById('track-most-raced').textContent =
+    mostRaced.track;
+
+  tbody.innerHTML = data.map(track => {
+
+    let heatClass = 'heat-neutral';
+
+    if (track.totalIR > 100)
+      heatClass = 'heat-good';
+
+    if (track.totalIR < 0)
+      heatClass = 'heat-bad';
+
+    return `
+      <tr>
+
+        <td>
+          ${track.track}
+        </td>
+
+        <td>
+          ${track.sessions}
+        </td>
+
+        <td>
+          P${track.avgFinish}
+        </td>
+
+        <td>
+          ${track.avgIR >= 0 ? '+' : ''}${track.avgIR}
+        </td>
+
+        <td class="${heatClass}">
+          ${track.totalIR >= 0 ? '+' : ''}${track.totalIR}
+        </td>
+
+        <td>
+          ${track.totalSR >= 0 ? '+' : ''}
+          ${track.totalSR.toFixed(2)}
+        </td>
+
+      </tr>
+    `;
+  }).join('');
 }

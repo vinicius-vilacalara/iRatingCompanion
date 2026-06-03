@@ -491,3 +491,45 @@ tbody td {
   font-size: 12px;
   color: #ffc800;
 }
+
+.track-summary-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.track-stat-card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  padding: 16px;
+  border-radius: var(--radius);
+}
+
+.track-stat-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.track-stat-value {
+  color: var(--gold);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.heat-good {
+  color: #00ff9c;
+  font-weight: 700;
+}
+
+.heat-neutral {
+  color: #ffc800;
+  font-weight: 700;
+}
+
+.heat-bad {
+  color: #ff4d4d;
+  font-weight: 700;
+}
