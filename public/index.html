@@ -101,7 +101,6 @@
                 <th>Finish</th>
                 <th>iRating Δ</th>
                 <th>Safety Δ</th>
-                <th>Score</th>
                 <th>Quality</th>
                 <th>iRating</th>
                 <th>Safety</th>
@@ -109,7 +108,7 @@
               </tr>
             </thead>
             <tbody id="session-tbody">
-              <tr class="empty-row"><td colspan="12">No sessions yet</td></tr>
+              <tr class="empty-row"><td colspan="11">No sessions yet</td></tr>
             </tbody>
           </table>
         </div>
@@ -317,6 +316,24 @@
       </div>
     </div>
   </div>
+
+  <div class="modal-overlay" id="track-modal">
+
+  <div class="modal track-modal">
+
+    <div id="track-modal-content"></div>
+
+    <div class="modal-actions">
+      <button
+        class="btn-secondary"
+        onclick="closeTrackDetails()">
+        Close
+      </button>
+    </div>
+
+  </div>
+
+</div>
 
   <script src="/js/app.js"></script>
 </body>

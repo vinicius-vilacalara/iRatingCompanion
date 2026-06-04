@@ -10,6 +10,8 @@ let currentChartMode = 'irating';
 let editingField = null;
 let currentPage = 1;
 const pageSize = 10;
+let trackModalPage = 1;
+const trackModalPageSize = 10;
 
 // ─── Init ─────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
@@ -105,7 +107,6 @@ function renderTable() {
     const saClass = s.safety_gain >= 0 ? 'cell-gain-pos' : 'cell-gain-neg';
     const irSign = s.irating_gain >= 0 ? '+' : '';
     const saSign = s.safety_gain >= 0 ? '+' : '';
-    const score = s.session_score ?? '-';
     const quality = s.session_quality ?? '-';
     const tags = s.session_tags || [];
     const tagsHtml = tags.map(t => `<span class="tag">${t}</span>`).join('');
@@ -125,9 +126,6 @@ function renderTable() {
         <td class="cell-pos">${s.final_position ? 'P' + s.final_position : '—'}</td>
         <td class="${irClass}">${irSign}${s.irating_gain}</td>
         <td class="${saClass}">${saSign}${parseFloat(s.safety_gain).toFixed(2)}</td>
-
-        <!-- ✅ NOVAS COLUNAS -->
-        <td class="cell-score">${score}</td>
         <td class="${qualityClass}">${quality}</td>
 
         <!-- 🔒 SEU CÓDIGO ORIGINAL PRESERVADO -->
@@ -608,7 +606,8 @@ document.getElementById('track-worst-name').textContent =
       heatClass = 'heat-bad';
 
     return `
-      <tr>
+      <tr class="track-row"
+      onclick="openTrackDetails('${track.track}')">
 
         <td>
           ${track.track}
@@ -639,3 +638,238 @@ document.getElementById('track-worst-name').textContent =
     `;
   }).join('');
 }
+
+function openTrackDetails(trackName) {
+
+  trackModalPage = 1;
+
+  renderTrackModal(trackName);
+
+  document
+    .getElementById('track-modal')
+    .classList.add('open');
+}
+
+function renderTrackModal(trackName) {
+
+  const trackSessions = sessions
+    .filter(s => s.track === trackName)
+    .sort(
+      (a,b) =>
+      new Date(b.date) - new Date(a.date)
+    );
+
+  const totalIR =
+    trackSessions.reduce(
+      (sum,s) => sum + s.irating_gain,
+      0
+    );
+
+  const totalSR =
+    trackSessions.reduce(
+      (sum,s) =>
+        sum + parseFloat(s.safety_gain),
+      0
+    );
+
+  const avgIR =
+    (totalIR / trackSessions.length)
+      .toFixed(1);
+
+  const avgFinish =
+    (
+      trackSessions.reduce(
+        (sum,s) =>
+          sum + (s.final_position || 0),
+        0
+      ) / trackSessions.length
+    ).toFixed(1);
+
+  const start =
+    (trackModalPage - 1)
+    * trackModalPageSize;
+
+  const pagedSessions =
+    trackSessions.slice(
+      start,
+      start + trackModalPageSize
+    );
+
+  const totalPages =
+    Math.ceil(
+      trackSessions.length /
+      trackModalPageSize
+    );
+
+  document.getElementById(
+    'track-modal-content'
+  ).innerHTML = `
+
+    <h2>${trackName}</h2>
+
+    <div class="track-summary-row">
+
+      <div class="track-stat-card">
+        <div class="track-stat-label">
+          Sessions
+        </div>
+        <div class="track-stat-value">
+          ${trackSessions.length}
+        </div>
+      </div>
+
+      <div class="track-stat-card">
+        <div class="track-stat-label">
+          Total iR
+        </div>
+        <div class="track-stat-value">
+          ${totalIR}
+        </div>
+      </div>
+
+      <div class="track-stat-card">
+        <div class="track-stat-label">
+          Avg iR
+        </div>
+        <div class="track-stat-value">
+          ${avgIR}
+        </div>
+      </div>
+
+      <div class="track-stat-card">
+        <div class="track-stat-label">
+          Avg Finish
+        </div>
+        <div class="track-stat-value">
+          P${avgFinish}
+        </div>
+      </div>
+
+    </div>
+
+    <table class="session-table">
+
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Finish</th>
+          <th>iR</th>
+          <th>SR</th>
+          <th>Quality</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        ${pagedSessions.map(s => `
+
+          <tr>
+
+            <td>
+              ${new Date(s.date)
+                .toLocaleDateString('en-GB')}
+            </td>
+
+            <td>
+              P${s.final_position || '-'}
+            </td>
+
+            <td>
+              ${s.irating_gain >= 0 ? '+' : ''}
+              ${s.irating_gain}
+            </td>
+
+            <td>
+              ${parseFloat(s.safety_gain)
+                .toFixed(2)}
+            </td>
+
+            <td>
+              ${s.session_quality}
+            </td>
+
+          </tr>
+
+        `).join('')}
+
+      </tbody>
+
+    </table>
+
+    <div class="pagination">
+
+      <button
+        ${trackModalPage === 1 ? 'disabled' : ''}
+        onclick="
+          trackModalPage--;
+          renderTrackModal('${trackName}')
+        ">
+        ← Prev
+      </button>
+
+      <span>
+        Page ${trackModalPage}
+        / ${totalPages}
+      </span>
+
+      <button
+        ${
+          trackModalPage === totalPages
+          ? 'disabled'
+          : ''
+        }
+        onclick="
+          trackModalPage++;
+          renderTrackModal('${trackName}')
+        ">
+        Next →
+      </button>
+
+    </div>
+
+    <h3 style="margin-top:24px;">
+      Observations
+    </h3>
+
+    ${trackSessions
+      .filter(s => s.obs)
+      .slice(0, 10)
+      .map(s => `
+
+        <div class="obs-card">
+
+          <strong>
+            ${new Date(s.date)
+              .toLocaleDateString('en-GB')}
+          </strong>
+
+          <br><br>
+
+          ${s.obs}
+
+        </div>
+
+      `).join('')}
+  `;
+}
+
+function closeTrackDetails() {
+
+  document
+    .getElementById('track-modal')
+    .classList.remove('open');
+
+  trackModalPage = 1;
+}
+
+document
+  .getElementById('track-modal')
+  .addEventListener('click', e => {
+
+    if (
+      e.target.id === 'track-modal'
+    ) {
+      closeTrackDetails();
+    }
+
+  });
